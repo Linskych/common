@@ -15,7 +15,7 @@ import java.util.Map;
  */
 public class HostMessageUtil {
 
-    private static Logger log = LoggerFactory.getLogger(HostMessageUtil.class);
+    private static final Logger log = LoggerFactory.getLogger(HostMessageUtil.class);
 
     public final static String HOST_IP = "host_ip";
     public final static String HOST_NAME = "host_name";
@@ -31,7 +31,7 @@ public class HostMessageUtil {
                 netAddress = InetAddress.getLocalHost();
             }
         } catch (UnknownHostException e) {
-            log.error("UnknownHostException" + e.getCause());
+            log.error("UnknownHostException.\n", e);
         }
         Map<String, String> hostMessageMap = new HashMap<String, String>();
         hostMessageMap.put(HOST_IP, netAddress.getHostAddress());
@@ -45,7 +45,7 @@ public class HostMessageUtil {
                 netAddress = InetAddress.getLocalHost();
             }
         } catch (UnknownHostException e) {
-            log.error("UnknownHostException" + e.getCause());
+            log.error("UnknownHostException.\n", e);
         }
         return netAddress.getHostAddress();
     }
@@ -56,7 +56,7 @@ public class HostMessageUtil {
                 netAddress = InetAddress.getLocalHost();
             }
         } catch (UnknownHostException e) {
-            log.error("UnknownHostException" + e.getCause());
+            log.error("UnknownHostException.\n", e);
         }
         return netAddress.getHostName();
     }

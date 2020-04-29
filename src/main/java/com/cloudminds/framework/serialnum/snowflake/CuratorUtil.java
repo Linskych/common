@@ -1,5 +1,12 @@
 package com.cloudminds.framework.serialnum.snowflake;
 
+import com.cloudminds.framework.json.JacksonUtil;
+import org.apache.curator.RetryPolicy;
+import org.apache.curator.framework.CuratorFramework;
+import org.apache.curator.framework.CuratorFrameworkFactory;
+import org.apache.curator.framework.imps.CuratorFrameworkState;
+import org.apache.curator.retry.ExponentialBackoffRetry;
+import org.apache.zookeeper.CreateMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,7 +21,7 @@ import java.util.Map;
  */
 public class CuratorUtil {
 
-    private static final Logger logger = LoggerFactory.getLogger(CuratorUtil.class);
+    private static final Logger log = LoggerFactory.getLogger(CuratorUtil.class);
 
     private static CuratorFramework client;
 
@@ -41,16 +48,16 @@ public class CuratorUtil {
         if (client == null) {
             client = getCuratorClient(zkPath, rootPath);
         }
-        if (client.isStarted() == false) {
+        if (client.getState() != CuratorFrameworkState.STARTED) {
             client.start();
         }
         for (int i = 1; i < 1024; i++) {
             try {
                 client.create().creatingParentsIfNeeded().withMode(CreateMode.EPHEMERAL).forPath("/"+i, getZkData().getBytes());
-                logger.info("work id {} is available.", i);
+                log.info("work id {} is available.", i);
                 return i;
             } catch (Exception e) {
-                logger.info("work id {} can not be used. {} ", i,e);
+                log.warn("work id {} can not be used.", i, e);
             }
 
         }
@@ -58,9 +65,9 @@ public class CuratorUtil {
     }
 
     private static String getZkData() {
-        Map<String,String> hostMessageMap  = com.cloudminds.ross.common.util.idGenerator.HostMessageUtil.getHostMessage();
+        Map<String,String> hostMessageMap  = HostMessageUtil.getHostMessage();
         Date date = new Date();
         hostMessageMap.put(CREATE_TIME, FORMAT.format(date));
-        return JSONArray.toJSONString(hostMessageMap);
+        return JacksonUtil.toJson(hostMessageMap);
     }
 }

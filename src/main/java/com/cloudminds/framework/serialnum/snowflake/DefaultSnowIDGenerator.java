@@ -4,7 +4,6 @@ import com.cloudminds.framework.serialnum.SerialNumGenerator;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 
 import javax.annotation.PostConstruct;
 
@@ -18,7 +17,7 @@ import javax.annotation.PostConstruct;
 
 public class DefaultSnowIDGenerator implements SerialNumGenerator {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultSnowIDGenerator.class);
+    private static final Logger log = LoggerFactory.getLogger(DefaultSnowIDGenerator.class);
 
     protected final long startTime = 1498608000000L;
     //机器ID占位，5
@@ -28,9 +27,9 @@ public class DefaultSnowIDGenerator implements SerialNumGenerator {
     //序列计数器占位 , 12
     protected final long sequenceBits = 12L;
     //最大机器ID，32
-    protected final long maxWorkerId = -1L ^ (-1L << workerIdBits);
+    protected final long maxWorkerId = ~(-1L << workerIdBits);
     //最大数据中心ID， 32
-    protected final long maxDataCenterId = -1L ^ (-1L << dataCenterIdBits);
+    protected final long maxDataCenterId = ~(-1L << dataCenterIdBits);
     //机器ID左移位数，12
     protected final long workerIdMoveBits = sequenceBits;
     //数据中心ID左移位数，17
@@ -38,7 +37,7 @@ public class DefaultSnowIDGenerator implements SerialNumGenerator {
     //时间戳左移位数，22
     protected final long timestampMoveBits = sequenceBits + workerIdBits + dataCenterIdBits;
     //序列掩码，12位最大整数值，4095
-    protected final long sequenceMask = -1L ^ (-1L << sequenceBits);
+    protected final long sequenceMask = ~(-1L << sequenceBits);
     //机器ID，0-31
     protected long workerId;
     //数据中心ID，0-31
@@ -59,7 +58,7 @@ public class DefaultSnowIDGenerator implements SerialNumGenerator {
         }
         this.workerId = workerId;
         this.dataCenterId = dataCenterId;
-        LOGGER.info("current work id is {}", workerId);
+        log.info("current work id is {}", workerId);
 
     }
 
@@ -109,7 +108,7 @@ public class DefaultSnowIDGenerator implements SerialNumGenerator {
         try {
             return String.valueOf(nextId());
         } catch (Exception e) {
-            LOGGER.error("Generate unique id exception.\n", e);
+            log.error("Generate unique id exception.\n", e);
         }
         return StringUtils.EMPTY;
     }
