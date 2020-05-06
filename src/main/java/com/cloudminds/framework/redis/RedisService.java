@@ -18,7 +18,7 @@ public class RedisService {
 
 
     /**
-     * @param script lua script to be executed in redis server
+     * @param script Lua script to be executed in redis server
      * */
     public <T> T execute(String script, Class<T> returnType, List<String> keys, String... values) {
 
@@ -50,17 +50,17 @@ public class RedisService {
         return redisTemplate.delete(key);
     }
 
-    public void mset(Map<String, Object> kvMap) {
+    public void set(Map<String, Object> kvMap) {
 
         redisTemplate.opsForValue().multiSet(kvMap);
     }
 
-    public List<Object> mget(Collection<String> keys) {
+    public List<Object> get(Collection<String> keys) {
 
         return redisTemplate.opsForValue().multiGet(keys);
     }
 
-    public Long mdel(Collection<String> keys) {
+    public Long del(Collection<String> keys) {
 
         return redisTemplate.delete(keys);
     }
