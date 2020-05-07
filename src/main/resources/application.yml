@@ -1,0 +1,19 @@
+server:
+  port: ${framework.server.port}
+
+spring:
+  application:
+    name: framework
+
+
+  # ===== redis =====
+  redis:
+    database: ${redis.database}
+    host: ${redis.host}
+    port: ${redis.port}
+    lettuce:
+      pool:
+        min-idle: ${redis.pool.lettuce.min-idle}
+        max-idle: ${redis.pool.lettuce.max-idle}
+        max-active: ${redis.pool.lettuce.max-active}
+        max-wait: ${redis.pool.lettuce.max-wait}
