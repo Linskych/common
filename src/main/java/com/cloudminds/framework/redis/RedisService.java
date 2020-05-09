@@ -12,6 +12,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Note： Do not use this service in your business code.
+ *       You should create cache manager service and set this service as a field.
+ *       Business code use cache manager service.
+ * */
 @Component
 public class RedisService {
 
@@ -24,7 +29,7 @@ public class RedisService {
     /**
      * @param script Lua script to be executed in redis server
      * */
-    public <T> T execute(String script, Class<T> returnType, List<String> keys, String... values) {
+    public <T> T execute(String script, Class<T> returnType, List<String> keys, Object... values) {
 
         return (T) redisTemplate.execute(RedisScript.of(script, returnType), keys, values);
     }
@@ -77,6 +82,13 @@ public class RedisService {
             value = System.currentTimeMillis();
         }
         return redisTemplate.opsForValue().setIfAbsent(lockKey, value, seconds, TimeUnit.SECONDS);
+    }
+
+    public Boolean setNxPx(String lockKey, Object value, long mills) {
+        if (value == null) {
+            value = System.currentTimeMillis();
+        }
+        return redisTemplate.opsForValue().setIfAbsent(lockKey, value, mills, TimeUnit.MILLISECONDS);
     }
 
     public Long incr(String key) {

@@ -6,7 +6,6 @@ spring:
     name: framework
 
 
-  # ===== redis =====
   redis:
     database: ${redis.database}
     host: ${redis.host}
