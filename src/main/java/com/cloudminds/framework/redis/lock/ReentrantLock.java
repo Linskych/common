@@ -6,16 +6,19 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
-public class RedisLock {
+public class ReentrantLock {
 
-    private static final Logger log = LoggerFactory.getLogger(RedisLock.class);
+    private static final Logger log = LoggerFactory.getLogger(ReentrantLock.class);
 
     private String key;//The key to be lock
     private String token;//Set as value of the key
     private RedisService redisService;
     private long expireMills;//The lock last time in millSecond
     private boolean retry;//Retry when fail to lock or not
+    private long newExpireMills;//Only for reentrant lock. This will be set as new expire time when re-entrant the lock.
+    private final AtomicInteger locks = new AtomicInteger();//To indicate how many times this lock used. This will be useful when unlock key.
 
 
     //Please do not remove any blank.
@@ -30,16 +33,25 @@ public class RedisLock {
                                                     " return 0" +
                                                 " end";
 
+    private static final int REENTRANT_SUCCESS = 1;
+    private static final String REENTRANT_LOCK_SCRIPT = " if ( ARGV[1] == redis.call( 'get', KEYS[1] ) ) then" +
+                                                            " if ( tonumber( ARGV[2] ) > 0 ) then"+
+                                                                " redis.call( 'expire', KEYS[1], ARGV[2] )"+
+                                                            " end"+
+                                                            " return 1" +
+                                                        " else" +
+                                                            " return 0" +
+                                                        " end";
 
+    private ReentrantLock() {}
 
-    private RedisLock() {}
-
-    public RedisLock(String key, String token, RedisService redisService, long expireMills, boolean retry) {
+    public ReentrantLock(String key, String token, RedisService redisService, long expireMills, boolean retry, long newExpireMills) {
         this.key = key;
         this.token = token;
         this.redisService = redisService;
         this.expireMills = expireMills;
         this.retry = retry;
+        this.newExpireMills = newExpireMills;
     }
 
     public Boolean tryLock() {
@@ -50,9 +62,22 @@ public class RedisLock {
 
         while (true) {
             try {
-                boolean lock = redisService.setNxPx(RedisLockUtil.formatKey(key), token, expireMills);
-                if (lock) {
-                    return Boolean.TRUE;
+                if (locks.intValue() > 0) {
+                    //It is the second time or after to try to lock.
+                    //Check if the token is the same to the value of key. Lock successfully when yes.
+                    //If the newExpireMills is greater than zero, the key will be set new expire time as newExpireMills in millisecond
+                    Long exeResult = redisService.execute(REENTRANT_LOCK_SCRIPT, Long.class, Collections.singletonList(RedisLockUtil.formatKey(key)), token, newExpireMills);
+                    if (exeResult == REENTRANT_SUCCESS) {
+                        locks.incrementAndGet();
+                        return Boolean.TRUE;
+                    }
+                } else {
+                    //It is the first time to try to lock.
+                    boolean lock = redisService.setNxPx(RedisLockUtil.formatKey(key), token, expireMills);
+                    if (lock) {
+                        locks.incrementAndGet();
+                        return Boolean.TRUE;
+                    }
                 }
             } catch (Exception e) {
                 log.error("Try to get redis lock error.\n", e);
@@ -78,6 +103,10 @@ public class RedisLock {
     }
 
     public Boolean unlock() {
+        //If there is only one holds this lock, we need to release this lock by deleting key-value from redis. Or we just need to decrease the locks.
+        if (locks.decrementAndGet() > 0) {
+            return Boolean.TRUE;
+        }
         try {
             Long exeResult = redisService.execute(UNLOCK_SCRIPT, Long.class, Collections.singletonList(RedisLockUtil.formatKey(key)), token);
             if (null != exeResult && exeResult >= 1) {
