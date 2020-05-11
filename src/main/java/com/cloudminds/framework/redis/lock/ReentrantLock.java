@@ -19,6 +19,7 @@ public class ReentrantLock {
     private boolean retry;//Retry when fail to lock or not
     private long newExpireMills;//Only for reentrant lock. This will be set as new expire time when re-entrant the lock.
     private final AtomicInteger locks = new AtomicInteger();//To indicate how many times this lock used. This will be useful when unlock key.
+    private boolean success;
 
 
     //Please do not remove any blank.
@@ -76,6 +77,7 @@ public class ReentrantLock {
                     boolean lock = redisService.setNxPx(RedisLockUtil.formatKey(key), token, expireMills);
                     if (lock) {
                         locks.incrementAndGet();
+                        success = true;
                         return Boolean.TRUE;
                     }
                 }
@@ -103,14 +105,18 @@ public class ReentrantLock {
     }
 
     public Boolean unlock() {
+        if (!success) {
+            //Never get lock.
+            return Boolean.FALSE;
+        }
         //If there is only one holds this lock, we need to release this lock by deleting key-value from redis. Or we just need to decrease the locks.
         if (locks.decrementAndGet() > 0) {
             return Boolean.TRUE;
         }
         try {
             Long exeResult = redisService.execute(UNLOCK_SCRIPT, Long.class, Collections.singletonList(RedisLockUtil.formatKey(key)), token);
+            log.debug("The raw result of tryUnlock operation: {}(1-del success, 2-not exist key, 0-fail to del)", exeResult);
             if (null != exeResult && exeResult >= 1) {
-                log.debug("The raw result of tryUnlock operation: {}(1-del success, 2-not exist key, 0-fail to del)", exeResult);
                 return Boolean.TRUE;
             }
         } catch (Exception e) {
