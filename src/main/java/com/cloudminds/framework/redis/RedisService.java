@@ -1,10 +1,9 @@
 package com.cloudminds.framework.redis;
 
+import com.google.common.collect.Lists;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.HashOperations;
-import org.springframework.data.redis.core.RedisCallback;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ZSetOperations;
+import org.springframework.data.redis.core.*;
 import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.stereotype.Component;
 
@@ -52,6 +51,23 @@ public class RedisService {
     public Long del(Collection<String> keys) {
 
         return redisTemplate.delete(keys);
+    }
+
+    /**
+     * @param count Not total number of result. Count of each sacan operation. Set a reasonable value, not too small or too big.
+     * */
+    public List<String> scan(String keyPatter, long count) {
+        if (StringUtils.isEmpty(keyPatter) || count == 0) {
+            return Collections.EMPTY_LIST;
+        }
+        return redisTemplate.execute((RedisCallback<List<String>>) con -> {
+            List<String> keys = Lists.newArrayList();
+            Cursor<byte[]> cursor = con.scan(ScanOptions.scanOptions().match(keyPatter).count(count).build());
+            while (cursor.hasNext()) {
+                keys.add(new String(cursor.next()));
+            }
+            return keys;
+        });
     }
 
 //===========================String=========================================
@@ -251,6 +267,9 @@ public class RedisService {
         return hashOperations.keys(key);
     }
 
+    public void hscan(String key, String hashPattern, long count) {
+        hashOperations.scan(key, ScanOptions.scanOptions().build())
+    }
 
 //===========================Set=========================================
 //friends, like, interest, fans; random elements; black/white list;

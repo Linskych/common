@@ -16,6 +16,7 @@ public class RedisLock {
     private RedisService redisService;
     private long expireMills;//The lock last time in millSecond
     private boolean retry;//Retry when fail to lock or not
+    private boolean success;//Hold a lock successfully
 
 
     //Please do not remove any blank.
@@ -52,7 +53,7 @@ public class RedisLock {
             try {
                 boolean lock = redisService.setNxPx(RedisLockUtil.formatKey(key), token, expireMills);
                 if (lock) {
-                    return Boolean.TRUE;
+                    return success = Boolean.TRUE;
                 }
             } catch (Exception e) {
                 log.error("Try to get redis lock error.\n", e);
@@ -77,8 +78,16 @@ public class RedisLock {
         return Boolean.FALSE;
     }
 
+    /**
+     * @return If the key was deleted after expire time and another client holds the lock, it will return false too.
+     *         But for current client the lock was released successfully.
+     * */
     public Boolean unlock() {
+        if (!success) {
+            return Boolean.FALSE;
+        }
         try {
+            //This avoids that a client will try to release the lock after the expire time deleting the key created by another client that acquired the lock later.
             Long exeResult = redisService.execute(UNLOCK_SCRIPT, Long.class, Collections.singletonList(RedisLockUtil.formatKey(key)), token);
             if (null != exeResult && exeResult >= 1) {
                 log.debug("The raw result of tryUnlock operation: {}(1-del success, 2-not exist key, 0-fail to del)", exeResult);
