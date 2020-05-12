@@ -14,7 +14,7 @@ public class RedisLock {
     private String key;//The key to be lock
     private String token;//Set as value of the key
     private RedisService redisService;
-    private long expireMills;//The lock last time in millSecond
+    private long expireMills;//The lock expire time in milliSecond. Your business run rime should be take into account.
     private boolean retry;//Retry when fail to lock or not
     private boolean success;//Hold a lock successfully
 
@@ -26,12 +26,11 @@ public class RedisLock {
                                                     " return 2" +
                                                 " elseif ( val == ARGV[1] )" +
                                                 " then" +
-                                                    " return redis.call( 'del', KEYS[1] )"+
+                                                    " redis.call( 'del', KEYS[1] )" +
+                                                    " return 1" +
                                                 " else" +
-                                                    " return 0" +
+                                                    " return -1" +
                                                 " end";
-
-
 
     private RedisLock() {}
 
@@ -80,7 +79,7 @@ public class RedisLock {
 
     /**
      * @return If the key was deleted after expire time and another client holds the lock, it will return false too.
-     *         But for current client the lock was released successfully.
+     *         But for current client the lock was released successfully. Maybe you should not use this result as a condition of your business logic.
      * */
     public Boolean unlock() {
         if (!success) {
@@ -89,8 +88,8 @@ public class RedisLock {
         try {
             //This avoids that a client will try to release the lock after the expire time deleting the key created by another client that acquired the lock later.
             Long exeResult = redisService.execute(UNLOCK_SCRIPT, Long.class, Collections.singletonList(RedisLockUtil.formatKey(key)), token);
-            if (null != exeResult && exeResult >= 1) {
-                log.debug("The raw result of tryUnlock operation: {}(1-del success, 2-not exist key, 0-fail to del)", exeResult);
+            log.debug("The raw result of tryUnlock operation: {}(1-del success, 2-not exist key, 0-fail to del)", exeResult);
+            if (exeResult != null && exeResult > 0) {
                 return Boolean.TRUE;
             }
         } catch (Exception e) {

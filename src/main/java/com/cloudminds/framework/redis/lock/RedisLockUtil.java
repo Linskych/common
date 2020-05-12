@@ -16,13 +16,9 @@ public class RedisLockUtil {
 
     private static final Logger log = LoggerFactory.getLogger(RedisLockUtil.class);
 
-
     private static final String LOCK_KEY_PREFIX = "REDIS_LOCK_";
-    public static final int INTERVAL_TIME = 50;//ms
-    private static final boolean REENTRANT_LOCK = Boolean.TRUE;
-    private static final boolean GENERAL_LOCK = Boolean.FALSE;
+    public static final int INTERVAL_TIME = 50;//ms, 50~100
     private static final boolean RETRY = Boolean.TRUE;
-    private static final boolean TRY_ONCE = Boolean.FALSE;
     private static final long NEW_EXPIRE_MILLS_ZERO = 0;
 
     @Autowired

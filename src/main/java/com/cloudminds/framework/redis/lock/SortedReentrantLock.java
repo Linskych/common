@@ -18,6 +18,7 @@ public class SortedReentrantLock {
     private long expireMillis;//The lock last time in millSecond
     private boolean retry;//Retry when fail to lock or not
     private long newExpireMillis;//This will be set as new expire time when re-entrant the lock.
+    private Boolean success;
 
 
     //Please do not remove any blank.
@@ -42,26 +43,21 @@ public class SortedReentrantLock {
                                                     " return -1" +
                                                 " end";
 
-    private static final int REENTRANT_SUCCESS = 1;
-    private static final String SORTED_REENTRANT_LOCK_SCRIPT =  " local val = redis.call( 'set' , KEYS[1] , ARGV[1], 'nx' , 'px' , ARGV[2] )" +
-                                                                " if ( val == false ) then" +
-                                                                    " if ( ARGV[1] == redis.call( 'get', KEYS[1] ) ) then" +
+    private static final String SORTED_REENTRANT_LOCK_SCRIPT =  " local val = redis.call( 'get', KEYS[1] )" +
+                                                                " if ( val ) then" +
+                                                                    " if ( val == ARGV[1] ) then" +
                                                                         " redis.call( 'lpush', KEYS[2], ARGV[3] ) )" +
-                                                                        " if ( tonumber( ARGV[4] ) > 0 ) then"+
-                                                                            " redis.call( 'pexpire', KEYS[1], ARGV[4] )"+
+                                                                        " if ( tonumber( ARGV[4] ) > 0 ) then" +
+                                                                            " redis.call( 'pexpire', KEYS[1], ARGV[4] )" +
                                                                             " redis.call( 'pexpire', KEYS[2], ARGV[4] ) )" +
                                                                         " end"+
                                                                         " return 2" +
                                                                     " else" +
-                                                                        " return 0" +
-                                                                    " end" +
+                                                                        " return -1" +
                                                                 " else" +
-                                                                    " redis.call( 'lpush', KEYS[2], ARGV[3] ) )" +
-                                                                    " redis.call( 'pexpire', KEYS[2], ARGV[2] ) )" +
+                                                                    " redis.call( 'set' , KEYS[1] , ARGV[1], 'nx' , 'px' , ARGV[2] )" +
                                                                     " return 1" +
                                                                 " end";
-    private static final String LOCK_KEY_PREFIX = "REDIS_LOCK_";
-    private static final int INTERVAL_TIME = 50;//ms
 
     private SortedReentrantLock() {}
 
@@ -88,8 +84,9 @@ public class SortedReentrantLock {
             try {
                 Long exeResult = redisService.execute(SORTED_REENTRANT_LOCK_SCRIPT, Long.class,
                         Arrays.asList(RedisLockUtil.formatKey(key), RedisLockUtil.formatKey(key + "_OWNERS")), token, expireMillis, owner, newExpireMillis);
-                if (exeResult == REENTRANT_SUCCESS) {
-                    return Boolean.TRUE;
+                log.debug("The raw result of tryLock operation: {}(1: lock first time, 2: re-entrant, -1: fail to lock)", exeResult);
+                if (exeResult != null && exeResult > 0) {
+                    return success = Boolean.TRUE;
                 }
             } catch (Exception e) {
                 log.error("Try to get redis lock error.\n", e);
@@ -99,13 +96,13 @@ public class SortedReentrantLock {
                 break;
             }
 
-            if (timeout < INTERVAL_TIME || System.currentTimeMillis() > end) {
+            if (timeout < RedisLockUtil.INTERVAL_TIME || System.currentTimeMillis() > end) {
                 log.info("Try to get redis lock {} timeout.", key);
                 break;
             }
 
             try {
-                TimeUnit.MILLISECONDS.sleep(INTERVAL_TIME);
+                TimeUnit.MILLISECONDS.sleep(RedisLockUtil.INTERVAL_TIME);
             } catch (InterruptedException e) {
                 log.error("Sleep interrupted.\n", e);
             }
@@ -119,15 +116,36 @@ public class SortedReentrantLock {
             log.warn("Owner is empty.");
             return Boolean.FALSE;
         }
-        try {
-            Long exeResult = redisService.execute(UNLOCK_SCRIPT, Long.class,
-                    Arrays.asList(RedisLockUtil.formatKey(key), RedisLockUtil.formatKey(key + "_OWNERS")), token, owner);
-            if (null != exeResult && exeResult > 0) {
+        if (!success) {
+            return Boolean.FALSE;
+        }
+
+        long timeout = expireMillis; //Use expireMillis as timeout.
+        long start = System.currentTimeMillis();
+        long end = start + timeout;
+
+        while (true) {
+            try {
+                Long exeResult = redisService.execute(UNLOCK_SCRIPT, Long.class,
+                        Arrays.asList(RedisLockUtil.formatKey(key), RedisLockUtil.formatKey(key + "_OWNERS")), token, owner);
                 log.debug("The raw result of tryUnlock operation: {}(1-all locks are released, 2-release one lock, 3-lock released by other or expired, -1-cannot match token, -2-cannot match owner)", exeResult);
-                return Boolean.TRUE;
+                if (exeResult != null && exeResult > 0) {
+                    return Boolean.TRUE;
+                }
+            } catch (Exception e) {
+                log.error("Try to unlock {} with value {} unsuccessfully.", key, token, e);
             }
-        } catch (Exception e) {
-            log.error("Try to unlock {} with value {} unsuccessfully.", key, token, e);
+
+            if (timeout < RedisLockUtil.INTERVAL_TIME || System.currentTimeMillis() > end) {
+                log.info("Try to unlock {} timeout.", key);
+                break;
+            }
+
+            try {
+                TimeUnit.MILLISECONDS.sleep(RedisLockUtil.INTERVAL_TIME);
+            } catch (InterruptedException e) {
+                log.error("Sleep interrupted.\n", e);
+            }
         }
         return Boolean.FALSE;
     }

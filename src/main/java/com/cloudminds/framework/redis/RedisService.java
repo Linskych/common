@@ -1,12 +1,16 @@
 package com.cloudminds.framework.redis;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.*;
 import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -19,10 +23,16 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class RedisService {
 
+    private static final Logger log = LoggerFactory.getLogger(RedisService.class);
+
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
     @Autowired
     private HashOperations<String, String, Object> hashOperations;
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
+
+
 
 
     /**
@@ -54,17 +64,22 @@ public class RedisService {
     }
 
     /**
+     * @Note The result maybe not contain all keys because new keys can be set while scaning.
      * @param count Not total number of result. Count of each sacan operation. Set a reasonable value, not too small or too big.
      * */
     public List<String> scan(String keyPatter, long count) {
-        if (StringUtils.isEmpty(keyPatter) || count == 0) {
-            return Collections.EMPTY_LIST;
+        if (StringUtils.isEmpty(keyPatter) || count <= 0) {
+            return Collections.emptyList();
         }
         return redisTemplate.execute((RedisCallback<List<String>>) con -> {
             List<String> keys = Lists.newArrayList();
-            Cursor<byte[]> cursor = con.scan(ScanOptions.scanOptions().match(keyPatter).count(count).build());
-            while (cursor.hasNext()) {
-                keys.add(new String(cursor.next()));
+
+            try (Cursor<byte[]> cursor = con.scan(ScanOptions.scanOptions().match(keyPatter).count(count).build())) {
+                while (cursor.hasNext()) {
+                    keys.add(new String(cursor.next()));
+                }
+            } catch (IOException e) {
+                log.error("Execute scan occurs error.", e);
             }
             return keys;
         });
@@ -267,13 +282,45 @@ public class RedisService {
         return hashOperations.keys(key);
     }
 
-    public void hscan(String key, String hashPattern, long count) {
-        hashOperations.scan(key, ScanOptions.scanOptions().build())
+    /**
+     * @Note The result maybe not contain all entries because new entries can be put while scaning.
+     * */
+    public <T> Map<String, T> hscan(String key, String hashPattern, long count) {
+
+        Map<String, T> map = Maps.newHashMap();
+        if (StringUtils.isEmpty(key) || StringUtils.isEmpty(hashPattern) || count <= 0) {
+            return map;
+        }
+
+        try (Cursor<Map.Entry<String, Object>> cursor = hashOperations.scan(
+                key, ScanOptions.scanOptions().match(hashPattern).count(count).build())) {
+
+            while (cursor.hasNext()) {
+                Map.Entry<String, Object> entry = cursor.next();
+                map.put(entry.getKey(), (T) entry.getValue());
+            }
+        } catch (IOException e) {
+            log.error("Execute hscan occurs error.", e);
+        }
+
+        return map;
     }
 
 //===========================Set=========================================
 //friends, like, interest, fans; random elements; black/white list;
 // note: For multiple keys operations make sure that all keys are in the same slot.
+
+
+    public Long sadd(String key, String[] elements) {
+
+        return stringRedisTemplate.opsForSet().add(key, elements);
+    }
+
+    public Set<String> smemberString(String key) {
+
+        return stringRedisTemplate.opsForSet().members(key);
+    }
+
 
     public Long sadd(String key, Object... vals) {
 
@@ -378,6 +425,26 @@ public class RedisService {
     public void sunionStore(Collection<String> keys, String destKey) {
 
         redisTemplate.opsForSet().unionAndStore(keys, destKey);
+    }
+
+    /**
+     * @Note The result maybe not contain all elements because new elements can be added while scaning.
+     * */
+    public <T> List<T> sscan(String key, long count) {
+
+        List<T> list = Lists.newArrayList();
+        if (StringUtils.isEmpty(key) || count < 0) {
+            return list;
+        }
+        try (Cursor<T> cursor = (Cursor<T>) redisTemplate.opsForSet().scan(key, ScanOptions.scanOptions().count(count).build())) {
+            while (cursor.hasNext()) {
+                list.add(cursor.next());
+            }
+        } catch (IOException e) {
+            log.error("Execute sscan occurs error.", e);
+        }
+
+        return list;
     }
 
 

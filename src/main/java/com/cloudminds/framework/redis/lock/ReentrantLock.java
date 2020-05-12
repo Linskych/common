@@ -8,6 +8,9 @@ import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * @desc Usage scenario: Held a lock by a thread and its sub threads(A lock no need to share with different applications)
+ * */
 public class ReentrantLock {
 
     private static final Logger log = LoggerFactory.getLogger(ReentrantLock.class);
@@ -19,7 +22,7 @@ public class ReentrantLock {
     private boolean retry;//Retry when fail to lock or not
     private long newExpireMills;//Only for reentrant lock. This will be set as new expire time when re-entrant the lock.
     private final AtomicInteger locks = new AtomicInteger();//To indicate how many times this lock used. This will be useful when unlock key.
-    private boolean success;
+    private Boolean success;
 
 
     //Please do not remove any blank.
@@ -29,9 +32,10 @@ public class ReentrantLock {
                                                     " return 2" +
                                                 " elseif ( val == ARGV[1] )" +
                                                 " then" +
-                                                    " return redis.call( 'del', KEYS[1] )"+
+                                                    " redis.call( 'del', KEYS[1] )" +
+                                                    " return 1" +
                                                 " else" +
-                                                    " return 0" +
+                                                    " return -1" +
                                                 " end";
 
     private static final int REENTRANT_SUCCESS = 1;
@@ -41,7 +45,7 @@ public class ReentrantLock {
                                                             " end"+
                                                             " return 1" +
                                                         " else" +
-                                                            " return 0" +
+                                                            " return -1" +
                                                         " end";
 
     private ReentrantLock() {}
@@ -68,7 +72,7 @@ public class ReentrantLock {
                     //Check if the token is the same to the value of key. Lock successfully when yes.
                     //If the newExpireMills is greater than zero, the key will be set new expire time as newExpireMills in millisecond
                     Long exeResult = redisService.execute(REENTRANT_LOCK_SCRIPT, Long.class, Collections.singletonList(RedisLockUtil.formatKey(key)), token, newExpireMills);
-                    if (exeResult == REENTRANT_SUCCESS) {
+                    if (exeResult != null && exeResult > 0) {
                         locks.incrementAndGet();
                         return Boolean.TRUE;
                     }
@@ -77,8 +81,7 @@ public class ReentrantLock {
                     boolean lock = redisService.setNxPx(RedisLockUtil.formatKey(key), token, expireMills);
                     if (lock) {
                         locks.incrementAndGet();
-                        success = true;
-                        return Boolean.TRUE;
+                        return success = Boolean.TRUE;
                     }
                 }
             } catch (Exception e) {
@@ -116,7 +119,7 @@ public class ReentrantLock {
         try {
             Long exeResult = redisService.execute(UNLOCK_SCRIPT, Long.class, Collections.singletonList(RedisLockUtil.formatKey(key)), token);
             log.debug("The raw result of tryUnlock operation: {}(1-del success, 2-not exist key, 0-fail to del)", exeResult);
-            if (null != exeResult && exeResult >= 1) {
+            if (exeResult != null && exeResult > 0) {
                 return Boolean.TRUE;
             }
         } catch (Exception e) {

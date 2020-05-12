@@ -4,9 +4,12 @@ import com.cloudminds.framework.redis.RedisService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * @desc Usage scenario: Hold a lock for different applications
+ * */
 public class DistributedReentrantLock {
 
     private static final Logger log = LoggerFactory.getLogger(DistributedReentrantLock.class);
@@ -17,6 +20,7 @@ public class DistributedReentrantLock {
     private long expireMills;//The lock last time in millSecond
     private boolean retry;//Retry when fail to lock or not
     private long newExpireMills;//Only for reentrant lock. This will be set as new expire time when re-entrant the lock.
+    private Boolean success;
 
 
     //Please do not remove any blank.
@@ -70,10 +74,10 @@ public class DistributedReentrantLock {
             try {
                 //Check if the token is the same to the value of key. Lock successfully when yes or not exist the key.
                 //If the newExpireMills is greater than zero, the key will be set new expire time as newExpireMills in millisecond
-                Long exeResult = redisService.execute(DIS_REENTRANT_LOCK_SCRIPT, Long.class, Collections.singletonList(RedisLockUtil.formatKey(key)), token, expireMills, newExpireMills);
+                Long exeResult = redisService.execute(DIS_REENTRANT_LOCK_SCRIPT, Long.class, Arrays.asList(RedisLockUtil.formatKey(key), RedisLockUtil.formatKey(key + "_COUNT")), token, expireMills, newExpireMills);
+                log.debug("The raw result of tryLock operation: {}(1: lock successfully first time, 2: re-entrant, -1: fail to lock)", exeResult);
                 if (exeResult != null && exeResult > 0) {
-                    log.debug("The raw result of tryLock operation: {}(1: lock successfully first time, 2: re-entrant, -1: fail to lock)", exeResult);
-                    return Boolean.TRUE;
+                    return success = Boolean.TRUE;
                 }
             } catch (Exception e) {
                 log.error("Try to get redis lock error.\n", e);
@@ -99,11 +103,14 @@ public class DistributedReentrantLock {
     }
 
     public Boolean unlock() {
+        if (!success) {
+            return Boolean.FALSE;
+        }
         try {
             //If there is only one holds this lock, we need to release this lock by deleting key-value from redis. Or we just need to decrease the locks.
-            Long exeResult = redisService.execute(UNLOCK_SCRIPT, Long.class, Collections.singletonList(RedisLockUtil.formatKey(key)), token);
-            if (null != exeResult && exeResult >= 1) {
-                log.debug("The raw result of tryUnlock operation: {}(1-del success, 2-not exist key, 0-fail to del)", exeResult);
+            Long exeResult = redisService.execute(UNLOCK_SCRIPT, Long.class, Arrays.asList(RedisLockUtil.formatKey(key), RedisLockUtil.formatKey(key + "_COUNT")), token);
+            log.debug("The raw result of tryUnlock operation: {}(1-del success, 2-not exist key, 0-fail to del)", exeResult);
+            if (null != exeResult && exeResult > 0) {
                 return Boolean.TRUE;
             }
         } catch (Exception e) {
