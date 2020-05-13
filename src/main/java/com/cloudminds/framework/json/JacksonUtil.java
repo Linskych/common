@@ -59,6 +59,17 @@ public class JacksonUtil {
 
     private JacksonUtil() {}
 
+    public static byte[] toJsonByte(Object obj) {
+        if (null != obj) {
+            try {
+                return FIELD_MAPPER.writeValueAsBytes(obj);
+            } catch (JsonProcessingException e) {
+                log.error("Write byte for {} occurs error.", obj, e);
+            }
+        }
+        return null;
+    }
+
     public static String toJson(Object obj) {
         if (null != obj) {
             try {
@@ -112,6 +123,17 @@ public class JacksonUtil {
         return null;
     }
 
+    public static <T> T toObject(byte[] bytes, Class<T> clazz) {
+        if (bytes != null) {
+            try {
+                return FIELD_MAPPER.readValue(bytes, clazz);
+            } catch (IOException e) {
+                log.error("Read json from {} occurs error.", new String(bytes), e);
+            }
+        }
+        return null;
+    }
+
     //The default constructor is needed for T
     public static <T> T toObject(String json, TypeReference<T> type) {
         if (StringUtils.isNotEmpty(json)) {
@@ -119,6 +141,17 @@ public class JacksonUtil {
                 return FIELD_MAPPER.readValue(json, type);
             } catch (IOException e) {
                 log.error("Read json from {} occurs error.", json, e);
+            }
+        }
+        return null;
+    }
+
+    public static <T> T toObject(byte[] bytes, TypeReference<T> type) {
+        if (bytes != null) {
+            try {
+                return FIELD_MAPPER.readValue(bytes, type);
+            } catch (IOException e) {
+                log.error("Read json from {} occurs error.", new String(bytes), e);
             }
         }
         return null;

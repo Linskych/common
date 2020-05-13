@@ -1,19 +1,21 @@
 package com.cloudminds.framework.redis;
 
+import com.cloudminds.framework.json.JacksonUtil;
+import org.springframework.data.redis.core.*;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.*;
-import org.springframework.data.redis.core.script.RedisScript;
+
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import org.springframework.data.redis.core.script.RedisScript;
 
 /**
  * Note： Do not use this service in your business code.
@@ -29,11 +31,6 @@ public class RedisService {
     private RedisTemplate<String, Object> redisTemplate;
     @Autowired
     private HashOperations<String, String, Object> hashOperations;
-    @Autowired
-    private StringRedisTemplate stringRedisTemplate;
-
-
-
 
     /**
      * @param script Lua script to be executed in redis server
@@ -91,6 +88,14 @@ public class RedisService {
     public void set(String key, Object val, long seconds) {
 
         redisTemplate.opsForValue().set(key, val, seconds, TimeUnit.SECONDS);
+    }
+
+    public <V> V get(String key, Class<V> type) {
+        Object obj = redisTemplate.opsForValue().get(key);
+        if (obj == null) {
+            return null;
+        }
+        return JacksonUtil.toObject((byte[]) obj, type);
     }
 
     public Object get(String key) {
@@ -309,18 +314,6 @@ public class RedisService {
 //===========================Set=========================================
 //friends, like, interest, fans; random elements; black/white list;
 // note: For multiple keys operations make sure that all keys are in the same slot.
-
-
-    public Long sadd(String key, String[] elements) {
-
-        return stringRedisTemplate.opsForSet().add(key, elements);
-    }
-
-    public Set<String> smemberString(String key) {
-
-        return stringRedisTemplate.opsForSet().members(key);
-    }
-
 
     public Long sadd(String key, Object... vals) {
 
