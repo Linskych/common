@@ -5,12 +5,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @ConditionalOnMissingBean(UniformExceptionHandler.class)
 @ConditionalOnWebApplication
-@ControllerAdvice
+@RestControllerAdvice
 public class UniformExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(UniformExceptionHandler.class);
