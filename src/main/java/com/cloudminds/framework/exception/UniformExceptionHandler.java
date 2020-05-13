@@ -8,7 +8,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplicat
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-@ConditionalOnMissingBean(UniformExceptionHandler.class)
 @ConditionalOnWebApplication
 @RestControllerAdvice
 public class UniformExceptionHandler {
