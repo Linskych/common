@@ -73,7 +73,8 @@ public class DistributedReentrantLock {
             try {
                 //Check if the token is the same to the value of key. Lock successfully when yes or not exist the key.
                 //If the newExpireMills is greater than zero, the key will be set new expire time as newExpireMills in millisecond
-                Long exeResult = redisService.execute(DIS_REENTRANT_LOCK_SCRIPT, Long.class, Arrays.asList(RedisLockUtil.formatKey(key), RedisLockUtil.formatKey(key + "_COUNT")), token, expireMills, newExpireMills);
+                Long exeResult = redisService.execute(DIS_REENTRANT_LOCK_SCRIPT, Long.class,
+                        Arrays.asList(RedisKeyUtil.formatLockKey(key), RedisKeyUtil.formatLockKey(key + "_COUNT")), token, expireMills, newExpireMills);
                 log.debug("The raw result of tryLock operation: {}(1: lock successfully first time, 2: re-entrant, -1: fail to lock)", exeResult);
                 if (exeResult != null && exeResult > 0) {
                     return success = Boolean.TRUE;
@@ -107,7 +108,8 @@ public class DistributedReentrantLock {
         }
         try {
             //If there is only one holds this lock, we need to release this lock by deleting key-value from redis. Or we just need to decrease the locks.
-            Long exeResult = redisService.execute(UNLOCK_SCRIPT, Long.class, Arrays.asList(RedisLockUtil.formatKey(key), RedisLockUtil.formatKey(key + "_COUNT")), token);
+            Long exeResult = redisService.execute(UNLOCK_SCRIPT, Long.class,
+                    Arrays.asList(RedisKeyUtil.formatLockKey(key), RedisKeyUtil.formatLockKey(key + "_COUNT")), token);
             log.debug("The raw result of tryUnlock operation: {}(1-del success, 2-not exist key, 0-fail to del)", exeResult);
             if (null != exeResult && exeResult > 0) {
                 return Boolean.TRUE;

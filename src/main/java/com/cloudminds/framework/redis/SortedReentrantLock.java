@@ -82,7 +82,7 @@ public class SortedReentrantLock {
         while (true) {
             try {
                 Long exeResult = redisService.execute(SORTED_REENTRANT_LOCK_SCRIPT, Long.class,
-                        Arrays.asList(RedisLockUtil.formatKey(key), RedisLockUtil.formatKey(key + "_OWNERS")), token, expireMillis, owner, newExpireMillis);
+                        Arrays.asList(RedisKeyUtil.formatLockKey(key), RedisKeyUtil.formatLockKey(key + "_OWNERS")), token, expireMillis, owner, newExpireMillis);
                 log.debug("The raw result of tryLock operation: {}(1: lock first time, 2: re-entrant, -1: fail to lock)", exeResult);
                 if (exeResult != null && exeResult > 0) {
                     return success = Boolean.TRUE;
@@ -126,7 +126,7 @@ public class SortedReentrantLock {
         while (true) {
             try {
                 Long exeResult = redisService.execute(UNLOCK_SCRIPT, Long.class,
-                        Arrays.asList(RedisLockUtil.formatKey(key), RedisLockUtil.formatKey(key + "_OWNERS")), token, owner);
+                        Arrays.asList(RedisKeyUtil.formatLockKey(key), RedisKeyUtil.formatLockKey(key + "_OWNERS")), token, owner);
                 log.debug("The raw result of tryUnlock operation: {}(1-all locks are released, 2-release one lock, 3-lock released by other or expired, -1-cannot match token, -2-cannot match owner)", exeResult);
                 if (exeResult != null && exeResult > 0) {
                     return Boolean.TRUE;

@@ -69,14 +69,14 @@ public class ReentrantLock {
                     //It is the second time or after to try to lock.
                     //Check if the token is the same to the value of key. Lock successfully when yes.
                     //If the newExpireMills is greater than zero, the key will be set new expire time as newExpireMills in millisecond
-                    Long exeResult = redisService.execute(REENTRANT_LOCK_SCRIPT, Long.class, Collections.singletonList(RedisLockUtil.formatKey(key)), token, newExpireMills);
+                    Long exeResult = redisService.execute(REENTRANT_LOCK_SCRIPT, Long.class, Collections.singletonList(RedisKeyUtil.formatLockKey(key)), token, newExpireMills);
                     if (exeResult != null && exeResult > 0) {
                         locks.incrementAndGet();
                         return Boolean.TRUE;
                     }
                 } else {
                     //It is the first time to try to lock.
-                    boolean lock = redisService.setNxPx(RedisLockUtil.formatKey(key), token, expireMills);
+                    boolean lock = redisService.setNxPx(RedisKeyUtil.formatLockKey(key), token, expireMills);
                     if (lock) {
                         locks.incrementAndGet();
                         return success = Boolean.TRUE;
@@ -115,7 +115,7 @@ public class ReentrantLock {
             return Boolean.TRUE;
         }
         try {
-            Long exeResult = redisService.execute(UNLOCK_SCRIPT, Long.class, Collections.singletonList(RedisLockUtil.formatKey(key)), token);
+            Long exeResult = redisService.execute(UNLOCK_SCRIPT, Long.class, Collections.singletonList(RedisKeyUtil.formatLockKey(key)), token);
             log.debug("The raw result of tryUnlock operation: {}(1-del success, 2-not exist key, 0-fail to del)", exeResult);
             if (exeResult != null && exeResult > 0) {
                 return Boolean.TRUE;
