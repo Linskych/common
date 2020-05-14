@@ -1,6 +1,6 @@
 package com.cloudminds.framework.redis.lock;
 
-import com.cloudminds.framework.redis.RedisService;
+import com.cloudminds.framework.redis.ObjectRedisService;
 import com.cloudminds.framework.serialnum.SerialNumGenerator;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -22,7 +22,7 @@ public class RedisLockUtil {
     private static final long NEW_EXPIRE_MILLS_ZERO = 0;
 
     @Autowired
-    private RedisService redisService;
+    private ObjectRedisService redisService;
     @Autowired
     @Qualifier("uuidGenerator")
     private SerialNumGenerator serialNumGenerator;

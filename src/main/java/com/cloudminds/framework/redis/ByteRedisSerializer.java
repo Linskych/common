@@ -1,6 +1,5 @@
 package com.cloudminds.framework.redis;
 
-import com.cloudminds.framework.json.JacksonUtil;
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.SerializationException;
 
@@ -11,7 +10,7 @@ public class ByteRedisSerializer implements RedisSerializer<Object> {
     @Override
     public byte[] serialize(Object o) throws SerializationException {
 
-        return JacksonUtil.toJsonByte(o);
+        return JacksonSerializerUtil.toJsonByte(o);
     }
 
     /**

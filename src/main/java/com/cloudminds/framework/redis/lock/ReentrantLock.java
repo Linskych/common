@@ -1,6 +1,6 @@
 package com.cloudminds.framework.redis.lock;
 
-import com.cloudminds.framework.redis.RedisService;
+import com.cloudminds.framework.redis.ObjectRedisService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,12 +17,12 @@ public class ReentrantLock {
 
     private String key;//The key to be lock
     private String token;//Set as value of the key
-    private RedisService redisService;
+    private ObjectRedisService redisService;
     private long expireMills;//The lock last time in millSecond
     private boolean retry;//Retry when fail to lock or not
     private long newExpireMills;//Only for reentrant lock. This will be set as new expire time when re-entrant the lock.
     private final AtomicInteger locks = new AtomicInteger();//To indicate how many times this lock used. This will be useful when unlock key.
-    private Boolean success;
+    private Boolean success = Boolean.FALSE;
 
 
     //Please do not remove any blank.
@@ -38,7 +38,6 @@ public class ReentrantLock {
                                                     " return -1" +
                                                 " end";
 
-    private static final int REENTRANT_SUCCESS = 1;
     private static final String REENTRANT_LOCK_SCRIPT = " if ( ARGV[1] == redis.call( 'get', KEYS[1] ) ) then" +
                                                             " if ( tonumber( ARGV[2] ) > 0 ) then"+
                                                                 " redis.call( 'expire', KEYS[1], ARGV[2] )"+
@@ -50,7 +49,7 @@ public class ReentrantLock {
 
     private ReentrantLock() {}
 
-    public ReentrantLock(String key, String token, RedisService redisService, long expireMills, boolean retry, long newExpireMills) {
+    public ReentrantLock(String key, String token, ObjectRedisService redisService, long expireMills, boolean retry, long newExpireMills) {
         this.key = key;
         this.token = token;
         this.redisService = redisService;
@@ -136,4 +135,7 @@ public class ReentrantLock {
         return token;
     }
 
+    public int getLocks() {
+        return locks.intValue();
+    }
 }

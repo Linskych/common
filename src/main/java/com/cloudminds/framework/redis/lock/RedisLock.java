@@ -1,6 +1,6 @@
 package com.cloudminds.framework.redis.lock;
 
-import com.cloudminds.framework.redis.RedisService;
+import com.cloudminds.framework.redis.ObjectRedisService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,10 +13,10 @@ public class RedisLock {
 
     private String key;//The key to be lock
     private String token;//Set as value of the key
-    private RedisService redisService;
+    private ObjectRedisService redisService;
     private long expireMills;//The lock expire time in milliSecond. Your business run rime should be take into account.
     private boolean retry;//Retry when fail to lock or not
-    private boolean success;//Hold a lock successfully
+    private boolean success = Boolean.FALSE;;//Hold a lock successfully
 
 
     //Please do not remove any blank.
@@ -34,7 +34,7 @@ public class RedisLock {
 
     private RedisLock() {}
 
-    public RedisLock(String key, String token, RedisService redisService, long expireMills, boolean retry) {
+    public RedisLock(String key, String token, ObjectRedisService redisService, long expireMills, boolean retry) {
         this.key = key;
         this.token = token;
         this.redisService = redisService;

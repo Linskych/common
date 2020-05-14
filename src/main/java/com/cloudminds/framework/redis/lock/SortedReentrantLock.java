@@ -1,6 +1,6 @@
 package com.cloudminds.framework.redis.lock;
 
-import com.cloudminds.framework.redis.RedisService;
+import com.cloudminds.framework.redis.ObjectRedisService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,11 +14,11 @@ public class SortedReentrantLock {
 
     private String key;//The key to be lock
     private String token;//Set as value of the key
-    private RedisService redisService;
+    private ObjectRedisService redisService;
     private long expireMillis;//The lock last time in millSecond
     private boolean retry;//Retry when fail to lock or not
     private long newExpireMillis;//This will be set as new expire time when re-entrant the lock.
-    private Boolean success;
+    private Boolean success = Boolean.FALSE;;
 
 
     //Please do not remove any blank.
@@ -61,7 +61,7 @@ public class SortedReentrantLock {
 
     private SortedReentrantLock() {}
 
-    public SortedReentrantLock(String key, String token, RedisService redisService, long expireMillis, boolean retry, long newExpireMillis) {
+    public SortedReentrantLock(String key, String token, ObjectRedisService redisService, long expireMillis, boolean retry, long newExpireMillis) {
         this.key = key;
         this.token = token;
         this.redisService = redisService;
