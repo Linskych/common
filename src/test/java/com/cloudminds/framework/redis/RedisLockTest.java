@@ -1,7 +1,5 @@
 package com.cloudminds.framework.redis;
 
-import com.cloudminds.framework.redis.lock.RedisLockUtil;
-import com.cloudminds.framework.redis.lock.ReentrantLock;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

@@ -1,6 +1,5 @@
-package com.cloudminds.framework.redis.lock;
+package com.cloudminds.framework.redis;
 
-import com.cloudminds.framework.redis.ObjectRedisService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +12,7 @@ public class SortedReentrantLock {
     private static final Logger log = LoggerFactory.getLogger(SortedReentrantLock.class);
 
     private String key;//The key to be lock
-    private String token;//Set as value of the key
+    private Object token;//Set as value of the key
     private ObjectRedisService redisService;
     private long expireMillis;//The lock last time in millSecond
     private boolean retry;//Retry when fail to lock or not
@@ -61,7 +60,7 @@ public class SortedReentrantLock {
 
     private SortedReentrantLock() {}
 
-    public SortedReentrantLock(String key, String token, ObjectRedisService redisService, long expireMillis, boolean retry, long newExpireMillis) {
+    public SortedReentrantLock(String key, Object token, ObjectRedisService redisService, long expireMillis, boolean retry, long newExpireMillis) {
         this.key = key;
         this.token = token;
         this.redisService = redisService;
@@ -133,7 +132,7 @@ public class SortedReentrantLock {
                     return Boolean.TRUE;
                 }
             } catch (Exception e) {
-                log.error("Try to unlock {} with value {} unsuccessfully.", key, token, e);
+                log.error("Try to unlock {} with value {} unsuccessfully.", key, JacksonSerializerUtil.toJson(token), e);
             }
 
             if (timeout < RedisLockUtil.INTERVAL_TIME || System.currentTimeMillis() > end) {
@@ -154,7 +153,7 @@ public class SortedReentrantLock {
         return key;
     }
 
-    public String getToken() {
+    public Object getToken() {
         return token;
     }
 

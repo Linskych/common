@@ -1,6 +1,5 @@
-package com.cloudminds.framework.redis.lock;
+package com.cloudminds.framework.redis;
 
-import com.cloudminds.framework.redis.ObjectRedisService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,7 +11,7 @@ public class RedisLock {
     private static final Logger log = LoggerFactory.getLogger(RedisLock.class);
 
     private String key;//The key to be lock
-    private String token;//Set as value of the key
+    private Object token;//Set as value of the key
     private ObjectRedisService redisService;
     private long expireMills;//The lock expire time in milliSecond. Your business run rime should be take into account.
     private boolean retry;//Retry when fail to lock or not
@@ -34,7 +33,7 @@ public class RedisLock {
 
     private RedisLock() {}
 
-    public RedisLock(String key, String token, ObjectRedisService redisService, long expireMills, boolean retry) {
+    public RedisLock(String key, Object token, ObjectRedisService redisService, long expireMills, boolean retry) {
         this.key = key;
         this.token = token;
         this.redisService = redisService;
@@ -93,7 +92,7 @@ public class RedisLock {
                 return Boolean.TRUE;
             }
         } catch (Exception e) {
-            log.error("Try to unlock {} with value {} unsuccessfully.", key, token, e);
+            log.error("Try to unlock {} with value {} unsuccessfully.", key, JacksonSerializerUtil.toJson(token), e);
         }
         return Boolean.FALSE;
     }
@@ -102,7 +101,7 @@ public class RedisLock {
         return key;
     }
 
-    public String getToken() {
+    public Object getToken() {
         return token;
     }
 

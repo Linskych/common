@@ -12,15 +12,16 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.CollectionUtils;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-public class JacksonSerializerUtil {
+/**
+ * Used only by current package
+ * */
+class JacksonSerializerUtil {
 
     private static final Logger log = LoggerFactory.getLogger(JacksonSerializerUtil.class);
 
