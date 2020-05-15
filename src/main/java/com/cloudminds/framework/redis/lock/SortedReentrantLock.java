@@ -1,5 +1,8 @@
-package com.cloudminds.framework.redis;
+package com.cloudminds.framework.redis.lock;
 
+import com.cloudminds.framework.json.JacksonUtil;
+import com.cloudminds.framework.redis.ObjectRedisService;
+import com.cloudminds.framework.redis.RedisKeyUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -132,7 +135,7 @@ public class SortedReentrantLock {
                     return Boolean.TRUE;
                 }
             } catch (Exception e) {
-                log.error("Try to unlock {} with value {} unsuccessfully.", key, JacksonSerializerUtil.toJson(token), e);
+                log.error("Try to unlock {} with value {} unsuccessfully.", key, JacksonUtil.toJson(token), e);
             }
 
             if (timeout < RedisLockUtil.INTERVAL_TIME || System.currentTimeMillis() > end) {

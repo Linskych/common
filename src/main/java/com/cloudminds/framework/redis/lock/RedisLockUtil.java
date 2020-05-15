@@ -1,5 +1,6 @@
-package com.cloudminds.framework.redis;
+package com.cloudminds.framework.redis.lock;
 
+import com.cloudminds.framework.redis.ObjectRedisService;
 import com.cloudminds.framework.serialnum.SerialNumGenerator;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
