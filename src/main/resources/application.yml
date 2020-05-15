@@ -5,6 +5,11 @@ spring:
   application:
     name: framework
 
+  messages:
+    basename: i18n/common,i18n/swm
+    encoding: UTF-8
+    param: lang
+
 
   redis:
     database: ${redis.database}
