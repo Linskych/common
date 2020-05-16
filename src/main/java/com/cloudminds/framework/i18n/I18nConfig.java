@@ -7,7 +7,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplicat
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -50,13 +49,6 @@ public class I18nConfig implements WebMvcConfigurer {
         messageSource.setUseCodeAsDefaultMessage(useCodeAsDefaultMessage);
 
         return messageSource;
-    }
-
-    @Bean
-    @ConditionalOnBean(MessageSource.class)
-    public MessageSourceAccessor messageSourceAccessor(MessageSource messageSource) {
-
-        return new MessageSourceAccessor(messageSource);
     }
 
 //*********************web config******************************
