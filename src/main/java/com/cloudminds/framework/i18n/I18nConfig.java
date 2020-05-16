@@ -15,6 +15,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 
+import java.util.Locale;
+
 
 @Configuration
 public class I18nConfig implements WebMvcConfigurer {
@@ -23,7 +25,12 @@ public class I18nConfig implements WebMvcConfigurer {
     private String basename;
     @Value("${spring.messages.encoding:UTF-8}")
     private String encoding;
-    @Value("${spring.messages.param:lang}")
+    @Value("${spring.messages.fallback-to-system-locale:false}")
+    private boolean fallbackToSystemLocale;
+    @Value("${spring.messages.use-code-as-default-message:true}")
+    private boolean useCodeAsDefaultMessage;
+
+    @Value("${spring.messages.param}")
     private String param;
 
 
@@ -38,6 +45,9 @@ public class I18nConfig implements WebMvcConfigurer {
         ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
         messageSource.setBasenames(basename.split(","));
         messageSource.setDefaultEncoding(encoding);
+        messageSource.setFallbackToSystemLocale(fallbackToSystemLocale);//If this is set as true, setDefaultLocale(Locale.ENGLISH) will not work
+        messageSource.setDefaultLocale(Locale.ENGLISH);//Used when the target locale not found
+        messageSource.setUseCodeAsDefaultMessage(useCodeAsDefaultMessage);
 
         return messageSource;
     }

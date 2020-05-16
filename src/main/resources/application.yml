@@ -8,7 +8,10 @@ spring:
   messages:
     basename: i18n/common,i18n/swm
     encoding: UTF-8
-    param: lang
+    fallback-to-system-locale: false
+    use-code-as-default-message: true #return code if true when not key-val found, or empty if false
+    param: lang #for session locale resolver in web application
+
 
 
   redis:
