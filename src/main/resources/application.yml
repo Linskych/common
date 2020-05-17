@@ -10,7 +10,10 @@ spring:
     encoding: UTF-8
     fallback-to-system-locale: false
     use-code-as-default-message: true #return code if true when not key-val found, or empty if false
-    param: lang #for session locale resolver in web application
+    defaultLang: en
+    use-session: true #if true you can get locale lang by request.getSession().getAttribute("i18n-lang")
+    lang-attribute-name: i18n-lang #the attribute name in http session if use session
+    lang-param-name: lang #request.getAttribute(lang-param-name)
 
 
 

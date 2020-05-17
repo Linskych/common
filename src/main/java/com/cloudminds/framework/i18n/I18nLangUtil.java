@@ -8,10 +8,7 @@ import org.springframework.stereotype.Component;
 
 
 @Component
-public class WebI18nUtil {
-
-    public static final String I18N_LANG_IN_SESSION = "i18n-lang";
-    public static final String I18N_TIMEZONE_IN_SESSION = "i18n-timezone";
+public class I18nLangUtil {
 
     @Autowired
     private MessageSource messageSource;
