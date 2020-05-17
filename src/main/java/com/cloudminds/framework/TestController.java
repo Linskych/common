@@ -27,7 +27,8 @@ public class TestController {
         Locale localeHolder = LocaleContextHolder.getLocale();
         String msg = i18nUtil.getMsg("swm.hello");
         String mm = messageSource.getMessage("swm.hello", null, "", localeSession);
-        return R.ok().setMsg(msg);
+        R r = R.ok().setMsg(msg);
+        return r;
     }
 
     @Autowired

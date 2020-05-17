@@ -16,5 +16,6 @@ public class TestFilter implements Filter {
         Locale locale = LocaleContextHolder.getLocale();
         Locale localeSession = (Locale) ((HttpServletRequest) request).getSession().getAttribute(WebI18nUtil.I18N_LANG_IN_SESSION);
         chain.doFilter(request, response);
+        Locale after = (Locale) ((HttpServletRequest) request).getSession().getAttribute(WebI18nUtil.I18N_LANG_IN_SESSION);
     }
 }
