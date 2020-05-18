@@ -22,13 +22,6 @@ public class R {
         return r;
     }
 
-    public static R okI18n(int code, String msgKey) {
-        R r = new R();
-        r.setCode(code);
-        r.setMsg(msgKey);
-        return r;
-    }
-
     public static R err() {
 
         return new R().setCode(ResponseCode.UNKNOWN_ERROR).setMsg("Unknown error.");
@@ -61,7 +54,8 @@ public class R {
         return data;
     }
 
-    public void setData(Object data) {
+    public R setData(Object data) {
         this.data = data;
+        return this;
     }
 }

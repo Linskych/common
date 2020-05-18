@@ -1,10 +1,10 @@
 package com.cloudminds.framework.exception;
 
-public class ParameterAssert implements Assert{
+public class ParameterAssert implements Assert {
 
 
     @Override
-    public BaseException exception() {
+    public ParameterException exception() {
 
         return new ParameterException();
     }
