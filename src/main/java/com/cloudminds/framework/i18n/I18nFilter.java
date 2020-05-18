@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.util.Locale;
 
 @WebFilter(filterName = "i18nFilter", urlPatterns = "/*")
-@Order(1990)
+@Order(2020)
 public class I18nFilter implements Filter {
 
     private static final Logger log = LoggerFactory.getLogger(I18nFilter.class);
