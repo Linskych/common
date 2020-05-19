@@ -1,12 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration>
+<Configuration status="WARN" monitorInterval="300"><!--status: the log level of log4j2 itself; monitorInterval: the interval time in second to check if the config file changed-->
+
+    <Properties>
+        <Property name="filename">framework</Property>
+        <Property name="dir">/opt/${filename}/logs</Property>
+    </Properties>
+
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT">
             <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
         </Console>
+        <RollingFile name="File" filename="${dir}/${filename}" filePattern="${dir}/${filename}.%i.log.gz">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] $${ctx:traceId} %-5level %logger{36} - %msg%n"/>
+            <SizeBasedTriggeringPolicy size="500" />
+        </RollingFile>
     </Appenders>
     <Loggers>
-        <Logger name="com.example" level="INFO"/>
+        <Logger name="com.cloudinds" level="INFO" additivity="false">
+            <AppenderRef ref="File"/>
+        </Logger>
         <Root level="error">
             <AppenderRef ref="Console"/>
         </Root>

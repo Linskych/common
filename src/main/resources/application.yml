@@ -1,9 +1,13 @@
 server:
   port: 8080
 
+logging:
+  config: file:D:\log4j2\log4j2.xml
+
+
 spring:
   application:
-    name: framework
+    name: skych
 
   messages:
     basename: i18n/common,i18n/swm
