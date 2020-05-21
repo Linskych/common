@@ -1,26 +1,48 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration status="WARN" monitorInterval="300"><!--status: the log level of log4j2 itself; monitorInterval: the interval time in second to check if the config file changed-->
+<Configuration status="WARN" monitorInterval="60"><!--status: the log level of log4j2 itself; monitorInterval: the interval time in second to check if the config file changed-->
 
     <Properties>
-        <Property name="filename">framework</Property>
-        <Property name="dir">/opt/${filename}/logs</Property>
+        <Property name="application">framework</Property>
+        <Property name="dir">/opt/${application}/logs</Property>
+        <Property name="layoutPatter">%d{HH:mm:ss.SSS} [%t] %X %-5level %c{10} - %msg%n</Property>
     </Properties>
 
     <Appenders>
-        <Console name="Console" target="SYSTEM_OUT">
-            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
-        </Console>
-        <RollingFile name="File" filename="${dir}/${filename}" filePattern="${dir}/${filename}.%i.log.gz">
-            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] $${ctx:traceId} %-5level %logger{36} - %msg%n"/>
-            <SizeBasedTriggeringPolicy size="500" />
-        </RollingFile>
+        <!-- Async Loggers will auto-flush in batches, so switch off immediateFlush. -->
+        <RollingRandomAccessFile name="ApplicationInfoAppender" filename="${dir}/${application}.log"
+                                 filePattern="${dir}/$${date:yyyy-MM}/${application}-%d{yyyy-MM-dd}-%i.log.gz" immediateFlush="false">
+            <PatternLayout pattern="${layoutPatter}"/>
+            <Policies><!--use this tag if more than one policy set-->
+                <TimeBasedTriggeringPolicy/>
+                <SizeBasedTriggeringPolicy size="256 MB" />
+            </Policies>
+            <!--Use nomax to indicate unlimited file number in one day. This avoid renaming file.-->
+            <!--Max value of "%i" in file pattern means it's a latest file-->
+            <DefaultRolloverStrategy fileIndex="nomax"/>
+        </RollingRandomAccessFile>
+
+        <RollingRandomAccessFile name="ApplicationErrorAppender" filename="${dir}/${application}_error.log"
+                                 filePattern="${dir}/$${date:yyyy-MM}/${application}_error-%d{yyyy-MM-dd}-%i.log.gz" immediateFlush="false">
+            <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout pattern="${layoutPatter}"/>
+            <Policies><!--use this tag if more than one policy set-->
+                <TimeBasedTriggeringPolicy/>
+                <SizeBasedTriggeringPolicy size="64 MB" />
+            </Policies>
+            <DefaultRolloverStrategy fileIndex="nomax">
+                <Delete basePath="${dir}" maxDepth="2">
+                    <IfFileName glob="*/${application}*.log.gz"/>
+                    <IfLastModified age="60d"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingRandomAccessFile>
+
     </Appenders>
+
     <Loggers>
-        <Logger name="com.cloudinds" level="INFO" additivity="false">
-            <AppenderRef ref="File"/>
-        </Logger>
-        <Root level="error">
-            <AppenderRef ref="Console"/>
+        <Root level="INFO" includeLocation="false">
+            <AppenderRef ref="ApplicationInfoAppender"/>
+            <AppenderRef ref="ApplicationErrorAppender"/>
         </Root>
     </Loggers>
 </Configuration>

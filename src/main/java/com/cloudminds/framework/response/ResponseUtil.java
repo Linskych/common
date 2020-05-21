@@ -1,15 +1,49 @@
 package com.cloudminds.framework.response;
 
 import com.cloudminds.framework.i18n.I18nLangUtil;
+import com.cloudminds.framework.json.JacksonUtil;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 @Component
 public class ResponseUtil {
 
+    private static final Logger log = LoggerFactory.getLogger(ResponseUtil.class);
+
     @Autowired
     private I18nLangUtil i18nLangUtil;
+
+
+    public void httpResponse(ServletResponse response, R r) {
+        if (response.isCommitted()) {
+            return;
+        }
+        HttpServletResponse servletResponse = (HttpServletResponse) response;
+        servletResponse.setStatus(HttpStatus.OK.value());
+        servletResponse.setCharacterEncoding(StandardCharsets.UTF_8.name());
+        servletResponse.setContentType("application/json; charset=utf-8");
+
+        try {
+            servletResponse.getWriter().write(JacksonUtil.toJson(r));
+            servletResponse.getWriter().flush();
+        } catch (IOException e) {
+            log.error("HttpResponse can not be written", e);
+        }
+    }
+
+    public R unknownException() {
+
+        return R.err(ResponseCode.UNKNOWN_ERROR, i18nLangUtil.getMsg("common.error"));
+    }
 
 //========================login/logout=====================================
 

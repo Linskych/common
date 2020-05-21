@@ -1,5 +1,6 @@
 package com.cloudminds.framework;
 
+import org.apache.logging.log4j.core.async.AsyncLoggerContextSelector;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -8,6 +9,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class FrameworkApplication {
 
     public static void main(String[] args) {
+        System.setProperty("log4j2.contextSelector", AsyncLoggerContextSelector.class.getName());
         SpringApplication.run(FrameworkApplication.class, args);
     }
 
