@@ -9,7 +9,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class FrameworkApplication {
 
     public static void main(String[] args) {
+        //Enable async logger
         System.setProperty("log4j2.contextSelector", AsyncLoggerContextSelector.class.getName());
+
         SpringApplication.run(FrameworkApplication.class, args);
     }
 

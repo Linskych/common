@@ -9,6 +9,11 @@ spring:
   application:
     name: skych
 
+  mvc:
+    throw-exception-if-no-handler-found: true
+  resources:
+    add-mappings: false
+
   messages:
     basename: i18n/common,i18n/swm
     encoding: UTF-8
