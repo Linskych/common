@@ -4,7 +4,6 @@ server:
 logging:
   config: file:D:\log4j2\log4j2.xml
 
-
 spring:
   application:
     name: skych
@@ -24,8 +23,6 @@ spring:
     lang-attribute-name: i18n-lang #the attribute name in http session if use session
     lang-param-name: lang #request.getAttribute(lang-param-name)
 
-
-
   redis:
     database: ${redis.database}
     host: ${redis.host}
@@ -36,3 +33,10 @@ spring:
         max-idle: ${redis.pool.lettuce.max-idle}
         max-active: ${redis.pool.lettuce.max-active}
         max-wait: ${redis.pool.lettuce.max-wait}
+
+  datasource:
+    driver-class-name: ${mysql.driver}
+    url: ${mysql.url}
+    username: ${mysql.username}
+    password: ${mysql.password}
+    type: ${datasource.type}

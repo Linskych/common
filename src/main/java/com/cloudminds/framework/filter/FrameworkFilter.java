@@ -69,6 +69,10 @@ public class FrameworkFilter implements Filter {
 
     }
 
+    /**
+     * @TODO How to get trace id for async method running in another thread.
+     *       Refer to http://chenbo.me/archives/224
+     * */
     private void initLogTraceId(ServletRequest request) {
         String traceId = request.getParameter("traceId");
         if (StringUtils.isEmpty(traceId)) {
