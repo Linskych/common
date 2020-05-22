@@ -1,7 +1,7 @@
-package com.cloudminds.framework.redis.lock;
+package com.cloudminds.framework.repo.cache.redis.lock;
 
 import com.cloudminds.framework.json.JacksonUtil;
-import com.cloudminds.framework.redis.Coder;
+import com.cloudminds.framework.repo.cache.redis.Coder;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

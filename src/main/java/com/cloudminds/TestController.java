@@ -1,12 +1,12 @@
-package com.cloudminds.framework;
+package com.cloudminds;
 
-import com.cloudminds.framework.redis.StringRedisService;
+import com.cloudminds.framework.json.JacksonUtil;
+import com.cloudminds.framework.repo.cache.redis.StringRedisService;
 import com.cloudminds.framework.response.R;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -19,8 +19,9 @@ public class TestController {
 
     @GetMapping("/test/lang")
     public R test() {
-        Integer.parseInt("kk");
-        log.info("/test/lang");
-        return R.ok();
+        R r = R.ok().setMsg("18:11:52.781 [http-nio-8080-exec-1] {} INFO  org.springframework.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'");
+        log.error(JacksonUtil.toJson(r));
+
+        return r;
     }
 }

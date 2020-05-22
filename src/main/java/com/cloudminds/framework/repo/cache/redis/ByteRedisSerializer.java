@@ -1,4 +1,4 @@
-package com.cloudminds.framework.redis;
+package com.cloudminds.framework.repo.cache.redis;
 
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.SerializationException;

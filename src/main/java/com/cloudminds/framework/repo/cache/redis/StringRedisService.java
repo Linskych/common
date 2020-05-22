@@ -1,4 +1,4 @@
-package com.cloudminds.framework.redis;
+package com.cloudminds.framework.repo.cache.redis;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -10,10 +10,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.*;
 import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 

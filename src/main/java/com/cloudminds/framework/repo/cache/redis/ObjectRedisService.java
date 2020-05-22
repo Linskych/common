@@ -1,7 +1,6 @@
-package com.cloudminds.framework.redis;
+package com.cloudminds.framework.repo.cache.redis;
 
 import com.google.common.collect.Sets;
-import org.checkerframework.checker.units.qual.C;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.*;
 import com.google.common.collect.Lists;
@@ -14,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import org.springframework.data.redis.core.script.RedisScript;

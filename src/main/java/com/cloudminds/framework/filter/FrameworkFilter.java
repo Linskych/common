@@ -1,8 +1,8 @@
 package com.cloudminds.framework.filter;
 
 import com.cloudminds.framework.i18n.I18nProperties;
-import com.cloudminds.framework.response.R;
 import com.cloudminds.framework.response.ResponseUtil;
+import com.cloudminds.framework.response.R;
 import com.cloudminds.framework.serialnum.SerialNumGenerator;
 import org.apache.logging.log4j.ThreadContext;
 import org.slf4j.Logger;

@@ -1,4 +1,4 @@
-package com.cloudminds.framework;
+package com.cloudminds;
 
 import org.apache.logging.log4j.core.async.AsyncLoggerContextSelector;
 import org.springframework.boot.SpringApplication;

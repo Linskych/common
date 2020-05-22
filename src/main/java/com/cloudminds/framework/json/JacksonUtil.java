@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -240,6 +241,13 @@ public class JacksonUtil {
             return false;
         }
         return true;
+    }
+
+
+    public static void main(String[] args) {
+        log.info("Result: {}", isJson(""));
+        org.apache.logging.log4j.Logger lg = LogManager.getLogger("lg");
+        lg.info("ss", () -> {return "ss";});
     }
 
 }

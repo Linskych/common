@@ -1,4 +1,4 @@
-package com.cloudminds.framework.redis;
+package com.cloudminds.framework.repo.cache.redis;
 
 import com.cloudminds.framework.json.JacksonUtil;
 import org.junit.jupiter.api.Test;

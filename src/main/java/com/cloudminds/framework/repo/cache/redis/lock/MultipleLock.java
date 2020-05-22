@@ -1,4 +1,4 @@
-package com.cloudminds.framework.redis.lock;
+package com.cloudminds.framework.repo.cache.redis.lock;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

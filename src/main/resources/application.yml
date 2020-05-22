@@ -40,3 +40,7 @@ spring:
     username: ${mysql.username}
     password: ${mysql.password}
     type: ${datasource.type}
+
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true

@@ -1,4 +1,4 @@
-package com.cloudminds.framework.redis.lock;
+package com.cloudminds.framework.repo.cache.redis.lock;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

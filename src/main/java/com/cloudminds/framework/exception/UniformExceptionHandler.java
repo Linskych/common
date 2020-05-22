@@ -1,8 +1,8 @@
 package com.cloudminds.framework.exception;
 
+import com.cloudminds.framework.response.ResponseUtil;
 import com.cloudminds.framework.i18n.I18nLangUtil;
 import com.cloudminds.framework.response.R;
-import com.cloudminds.framework.response.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
