@@ -23,31 +23,37 @@ public class BankAccountHandler extends BaseTypeHandler<String> {
     @Override
     public String getNullableResult(ResultSet rs, String columnName) throws SQLException {
 
-        String account = rs.getString(columnName);
-        return StringUtils.isEmpty(account) ? account : desensitize(account,3);
+        return desensitize(rs.getString(columnName));
     }
 
     @Override
     public String getNullableResult(ResultSet rs, int columnIndex) throws SQLException {
 
-        String account = rs.getString(columnIndex);
-        return StringUtils.isEmpty(account) ? account : desensitize(account,3);
+        return desensitize(rs.getString(columnIndex));
     }
 
     @Override
     public String getNullableResult(CallableStatement cs, int columnIndex) throws SQLException {
 
-        String account = cs.getString(columnIndex);
-        return StringUtils.isEmpty(account) ? account : desensitize(account,3);
+        return desensitize(cs.getString(columnIndex));
     }
 
     /**
-     * @param n Split account into n parts and replace the part in the middle with stars
+     * Split account into 3 parts and replace the part in the middle with stars
      * */
-    private String desensitize(String account, int n) {
-
+    private String desensitize(String account) {
+        if (StringUtils.isEmpty(account)) {
+            return account;
+        }
         int size = account.length();
-        return account.substring(0, size/n) + "***" + account.substring(size*(n-1)/n-1, size-1);
+        switch (size){
+            case 1:
+                return "***";
+            case 2:
+                return "***" + account.substring(1);
+            default:
+               return account.substring(0, size/3) + "***" + account.substring(size*2/3-1, size-1);
+        }
     }
 
 }
