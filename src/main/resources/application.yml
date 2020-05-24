@@ -40,7 +40,12 @@ spring:
     username: ${mysql.username}
     password: ${mysql.password}
     type: ${datasource.type}
+    hikari:
+      minimum-idle: ${hikari.minimum-idle}
+      maximum-pool-size: ${hikari.maximum-pool-size}
+      idle-timeout: ${hikari.idle-timeout}
 
 mybatis:
   configuration:
     map-underscore-to-camel-case: true
+  type-handlers-package: com.cloudminds.framework.mybatis.typehandler #add your handler package join by comma
