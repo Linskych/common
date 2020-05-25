@@ -44,6 +44,19 @@ spring:
       minimum-idle: ${hikari.minimum-idle}
       maximum-pool-size: ${hikari.maximum-pool-size}
       idle-timeout: ${hikari.idle-timeout}
+      pool-name: hikari-pool
+      data-source-properties: #some mysql config properties suggested by HikariCP
+        cachePrepStmts: true
+        prepStmtCacheSize: 250
+        prepStmtCacheSqlLimit: 1024
+        useServerPrepStmts: true
+        useLocalSessionState: true
+        rewriteBatchedStatements: true
+        cacheResultSetMetadata: true
+        cacheServerConfiguration: true
+        elideSetAutoCommits: true
+        maintainTimeStats: false
+
 
 mybatis:
   configuration:
