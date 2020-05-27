@@ -56,6 +56,13 @@ spring:
         cacheServerConfiguration: true
         elideSetAutoCommits: true
         maintainTimeStats: false
+        characterEncoding: UTF-8
+        useSSL: false
+        compensateOnDuplicateKeyUpdateCounts: false
+        useAffectedRows: true
+        serverTimezone: UTC
+        failOverReadOnly: false
+
 
 mybatis:
   configuration:
