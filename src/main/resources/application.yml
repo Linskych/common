@@ -20,8 +20,8 @@ spring:
     use-code-as-default-message: true #return code if true when not key-val found, or empty if false
     lang-default: en
     use-session: true #if true you can get locale lang by request.getSession().getAttribute("i18n-lang")
-    lang-attribute-name: i18n-lang #the attribute name in http session if use session
-    lang-param-name: lang #request.getAttribute(lang-param-name)
+    lang-attribute-name: i18n-lang #the attribute name in http session if use session. request.getSession().getAttribute("i18n-lang")
+    lang-param-name: lang #request.getParameter("lang")
 
   redis:
     database: ${redis.database}
@@ -57,10 +57,10 @@ spring:
         elideSetAutoCommits: true
         maintainTimeStats: false
 
-
 mybatis:
   configuration:
     map-underscore-to-camel-case: true
     local-cache-scope: STATEMENT #close session cache
     cache-enabled: true
   type-handlers-package: com.cloudminds.framework.mybatis.typehandler #add your handler package join by comma
+  type-aliases-package: com.cloudminds.common.repo.dao.entity #add your entity package join by comma
